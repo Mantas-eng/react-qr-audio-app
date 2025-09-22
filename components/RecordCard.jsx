@@ -1,5 +1,5 @@
 import Link from "next/link";
-import QRCode from "qrcode.react";
+import QRCode from "react-qr-code";
 
 export default function RecordCard({ rec, isMobile, onScanClick }) {
   const link = `/record/${rec.id}`;
@@ -15,7 +15,8 @@ export default function RecordCard({ rec, isMobile, onScanClick }) {
       {!isMobile && (
         <>
           <div className="mb-4">
-            <QRCode value={origin + link} size={96} />
+            <QRCode value={origin + link} size={96} />{" "}
+            {/* react-qr-code palaiko value */}
           </div>
           <Link
             href={link}
