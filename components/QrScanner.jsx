@@ -8,9 +8,9 @@ export default function QrScanner({ onScanSuccess, onClose }) {
   const html5QrCodeRef = useRef(null);
 
   useEffect(() => {
-    if (!scanning) return;
-
     const qrRegionId = "qr-reader";
+
+    if (!scanning) return;
     if (!document.getElementById(qrRegionId)) return;
 
     html5QrCodeRef.current = new Html5Qrcode(qrRegionId);
@@ -21,7 +21,7 @@ export default function QrScanner({ onScanSuccess, onClose }) {
         { fps: 10, qrbox: 250 },
         (decodedText) => {
           onScanSuccess(decodedText);
-          html5QrCodeRef.current.stop();
+          html5QrCodeRef.current.stop().catch(() => {});
           setScanning(false);
         },
         (errorMessage) => {}
@@ -35,22 +35,19 @@ export default function QrScanner({ onScanSuccess, onClose }) {
     };
   }, [scanning]);
 
+  useEffect(() => {
+    setScanning(true);
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-6 w-full max-w-md flex flex-col items-center">
         <h2 className="text-xl font-bold mb-4">Scan QR Code</h2>
-
-        {!scanning ? (
-          <button
-            onClick={() => setScanning(true)}
-            className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
-          >
-            Tap to Scan
-          </button>
-        ) : (
-          <div id="qr-reader" className="w-full h-64 mb-4" />
-        )}
-
+        <div
+          id="qr-reader"
+          className="w-full h-64 mb-4"
+          style={{ width: "100%" }}
+        />
         <button
           onClick={() => {
             if (html5QrCodeRef.current)
