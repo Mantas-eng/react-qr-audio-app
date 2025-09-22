@@ -1,12 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
 export default function QrScanner({ onScanSuccess }) {
+  const qrContainerRef = useRef(null);
+  const html5QrCodeRef = useRef(null);
   const [scanning, setScanning] = useState(false);
 
   const startScanner = () => {
-    const elementId = "qr-reader";
+    if (!qrContainerRef.current) return;
 
     const cameraMode = /Mobi|Android|iPhone|iPad|iPod/i.test(
       navigator.userAgent
@@ -14,50 +16,46 @@ export default function QrScanner({ onScanSuccess }) {
       ? "environment"
       : "user";
 
-    const html5QrCode = new Html5Qrcode(elementId);
+    html5QrCodeRef.current = new Html5Qrcode("qr-reader");
 
-    html5QrCode
+    html5QrCodeRef.current
       .start(
         { facingMode: cameraMode },
-        { fps: 10, qrbox: 250 },
+        { fps: 50, qrbox: 400 },
         (decodedText) => {
           onScanSuccess(decodedText);
-          html5QrCode.stop().then(() => html5QrCode.clear());
-          setScanning(false);
+          stopScanner();
         },
-        (err) => console.log("QR scan error:", err)
+        (err) => {
+          console.log("QR scan error:", err);
+        }
       )
       .then(() => setScanning(true))
       .catch((err) => alert("Kamera neprieinama: " + err.message));
   };
 
-  useEffect(() => {
-    return () => {
-      // cleanup: stop scanner on unmount
-      if (scanning) {
-        const html5QrCode = new Html5Qrcode("qr-reader");
-        html5QrCode
-          .stop()
-          .then(() => html5QrCode.clear())
-          .catch(() => {});
-      }
-    };
-  }, [scanning]);
+  const stopScanner = async () => {
+    if (html5QrCodeRef.current) {
+      try {
+        await html5QrCodeRef.current.stop();
+      } catch (err) {}
+      html5QrCodeRef.current.clear();
+      html5QrCodeRef.current = null;
+    }
+    setScanning(false);
+  };
 
   return (
-    <div className="flex flex-col items-center w-full">
+    <div className="w-full flex flex-col items-center">
       {!scanning && (
         <button
           onClick={startScanner}
-          className="bg-yellow-400 text-white px-4 py-2 rounded-lg mb-4 hover:bg-yellow-500"
+          className="bg-yellow-400 text-white px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
         >
-          Bakstelėkite, kad nuskanuotumėte
+          Bakstelėkite, kad nuskenuotumėte
         </button>
       )}
-      <div
-        id="qr-reader"
-        className="w-full h-64 bg-gray-200 rounded-md flex items-center justify-center"
-      >
+      <div id="qr-reader" ref={qrContainerRef}>
         {scanning && <p className="text-gray-600">Skenuojama...</p>}
       </div>
     </div>
