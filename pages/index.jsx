@@ -1,5 +1,6 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect, useState } from "react";
 import RecordCard from "../components/RecordCard";
 import QrScanner from "../components/QrScanner";
 import records from "../data/records";
@@ -7,7 +8,8 @@ import records from "../data/records";
 export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedRec, setSelectedRec] = useState(null);
-  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scannerVisible, setScannerVisible] = useState(false);
+  const [scanResult, setScanResult] = useState("");
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -18,19 +20,9 @@ export default function HomePage() {
 
   const handleCardClick = (rec) => {
     if (isMobile) {
-      setSelectedRec(rec); // mobilui parodys QR “Tap to Scan”
+      setSelectedRec(rec);
     }
   };
-
-  const openScanner = () => setScannerOpen(true);
-  const closeScanner = () => setScannerOpen(false);
-
-  const handleScanSuccess = (decodedText) => {
-    alert(`QR nuskaitytas: ${decodedText}`);
-    closeScanner();
-  };
-
-  const closeQRModal = () => setSelectedRec(null);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,7 +36,6 @@ export default function HomePage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* QR modal mobiliesiems */}
         {selectedRec && (
           <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-2xl shadow-xl text-center">
@@ -54,7 +45,7 @@ export default function HomePage() {
               <p className="mb-4 text-gray-600">Tap to Scan QR code 👇</p>
               <RecordCard rec={selectedRec} showButton={false} />
               <button
-                onClick={closeQRModal}
+                onClick={() => setSelectedRec(null)}
                 className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
               >
                 Uždaryti
@@ -62,20 +53,6 @@ export default function HomePage() {
             </div>
           </div>
         )}
-
-        {/* QR Scanner modal */}
-        {scannerOpen && (
-          <QrScanner onScanSuccess={handleScanSuccess} onClose={closeScanner} />
-        )}
-
-        <div className="flex justify-center mb-6">
-          <button
-            onClick={openScanner}
-            className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition"
-          >
-            Tap to Scan (Mobile/Desktop)
-          </button>
-        </div>
 
         <div
           className={`grid gap-6 ${
@@ -90,6 +67,32 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+
+        <div className="mt-8 text-center">
+          <button
+            onClick={() => setScannerVisible(true)}
+            className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700"
+          >
+            Open QR Scanner
+          </button>
+        </div>
+
+        {scannerVisible && (
+          <QrScanner
+            onScanSuccess={(text) => {
+              setScanResult(text);
+              setScannerVisible(false);
+            }}
+            onClose={() => setScannerVisible(false)}
+          />
+        )}
+
+        {scanResult && (
+          <div className="mt-4 text-center">
+            <p className="font-semibold">Scanned QR code:</p>
+            <code className="bg-gray-200 p-2 rounded">{scanResult}</code>
+          </div>
+        )}
       </main>
     </div>
   );
