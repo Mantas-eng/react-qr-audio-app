@@ -8,12 +8,12 @@ export default function Player({ rec }) {
         {isVideo ? (
           <video controls className="w-full rounded">
             <source src={rec.file} />
-            Your browser does not support the video tag.
+            Jūsų naršyklė nepalaiko vaizdo žymos.
           </video>
         ) : (
           <audio controls className="w-full">
             <source src={rec.file} />
-            Your browser does not support the audio element.
+            Jūsų naršyklė nepalaiko garso elemento.
           </audio>
         )}
       </div>

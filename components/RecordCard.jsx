@@ -11,10 +11,9 @@ export default function RecordCard({ rec, onScanClick }) {
       </div>
       <h2 className="text-lg font-semibold mb-4 text-center">{rec.title}</h2>
       <p className="text-sm text-gray-600 text-center">
-        Tap to open modal and scan QR code
+        Bakstelėkite, kad atidarytumėte langą ir nuskenuotumėte QR kodą
       </p>
 
-      {/* QR vizualizacija */}
       <div className="mt-4 bg-gray-100 p-2 rounded">
         <QRCode value={rec.file} size={120} />
       </div>

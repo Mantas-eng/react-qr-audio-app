@@ -9,7 +9,7 @@ export default function HomePage() {
 
   const handleCardClick = (rec) => {
     setSelectedRec(rec);
-    setScanResult(""); // išvalome ankstesnį rezultatą
+    setScanResult("");
   };
 
   return (
@@ -27,16 +27,22 @@ export default function HomePage() {
       {/* Modalas */}
       {selectedRec && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">{selectedRec.title}</h2>
+          <div className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-md relative">
+            <button
+              onClick={() => setSelectedRec(null)}
+              className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-yellow-400 text-white font-semibold px-5 py-1 rounded-lg hover:bg-yellow-500 transition"
+            >
+              Uždaryti
+            </button>
 
+            <h2 className="text-xl font-semibold mb-4">{selectedRec.title}</h2>
             <p className="mb-4 text-gray-600">Nuskenuokite QR kodą su kamera</p>
 
             {!scanResult ? (
               <QrScanner onScanSuccess={(text) => setScanResult(text)} />
             ) : (
               <div>
-                <p className="mb-4">Scanned QR code:</p>
+                <p className="mb-4">Nuskenuotas QR kodas:</p>
                 <a
                   href={scanResult}
                   target="_blank"
@@ -45,12 +51,6 @@ export default function HomePage() {
                 >
                   {scanResult}
                 </a>
-                <button
-                  onClick={() => setSelectedRec(null)}
-                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
-                >
-                  Close
-                </button>
               </div>
             )}
           </div>

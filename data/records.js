@@ -1,4 +1,3 @@
-
 const records = [
   {
     id: 1,
@@ -73,17 +72,17 @@ const records = [
   {
     id: 15,
     title: "QR15_cista",
-    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR15_cista.avi",
+    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR15_cista.mp4",
   },
   {
     id: 16,
     title: "QR16_Reinke",
-    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR16_Reinke.avi",
+    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR16_Reinke.mp4",
   },
   {
     id: 17,
     title: "QR17_paralyžius",
-    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR17_paralyz%CC%8Cius.avi",
+    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR17_paralyz%CC%8Cius.mp4",
   },
   {
     id: 18,
@@ -93,7 +92,7 @@ const records = [
   {
     id: 19,
     title: "QR19_vėžys",
-    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR19_ve%CC%87z%CC%8Cys.avi",
+    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR19_ve%CC%87z%CC%8Cys.mp4",
   },
   {
     id: 20,
@@ -103,7 +102,7 @@ const records = [
   {
     id: 21,
     title: "QR21_polipas",
-    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR21_polipas.avi",
+    file: "https://pub-3c895bf9c309451991907ad43f63c195.r2.dev/QR21_polipas.mp4",
   },
   {
     id: 22,
