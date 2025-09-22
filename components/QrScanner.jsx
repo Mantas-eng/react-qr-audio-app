@@ -21,7 +21,7 @@ export default function QrScanner({ onScanSuccess }) {
     html5QrCodeRef.current
       .start(
         { facingMode: cameraMode },
-        { fps: 10, qrbox: 300 },
+        { fps: 20, qrbox: 350 },
         (decodedText) => {
           onScanSuccess(decodedText);
           stopScanner();
