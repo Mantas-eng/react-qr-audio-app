@@ -1,4 +1,3 @@
-"use client";
 import { useState } from "react";
 import RecordCard from "../components/RecordCard";
 import QrScanner from "../components/QrScanner";
@@ -11,15 +10,6 @@ export default function HomePage() {
   const handleCardClick = (rec) => {
     setSelectedRec(rec);
     setScanResult(""); // išvalome ankstesnį rezultatą
-  };
-
-  const handleScanSuccess = (text) => {
-    setScanResult(text);
-  };
-
-  const closeModal = () => {
-    setSelectedRec(null);
-    setScanResult("");
   };
 
   return (
@@ -40,8 +30,10 @@ export default function HomePage() {
           <div className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">{selectedRec.title}</h2>
 
+            <p className="mb-4 text-gray-600">Nuskenuokite QR kodą su kamera</p>
+
             {!scanResult ? (
-              <QrScanner onScanSuccess={handleScanSuccess} />
+              <QrScanner onScanSuccess={(text) => setScanResult(text)} />
             ) : (
               <div>
                 <p className="mb-4">Scanned QR code:</p>
@@ -54,21 +46,12 @@ export default function HomePage() {
                   {scanResult}
                 </a>
                 <button
-                  onClick={closeModal}
+                  onClick={() => setSelectedRec(null)}
                   className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
                 >
                   Close
                 </button>
               </div>
-            )}
-
-            {!scanResult && (
-              <button
-                onClick={closeModal}
-                className="mt-4 px-4 py-2 bg-gray-400 text-white rounded-xl hover:bg-gray-500"
-              >
-                Cancel
-              </button>
             )}
           </div>
         </div>

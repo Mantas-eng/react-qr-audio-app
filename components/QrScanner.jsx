@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
 export default function QrScanner({ onScanSuccess }) {
@@ -16,7 +16,6 @@ export default function QrScanner({ onScanSuccess }) {
       ? "environment"
       : "user";
 
-    // Naudojame id, ne ref objektą
     html5QrCodeRef.current = new Html5Qrcode("qr-reader");
 
     html5QrCodeRef.current
@@ -32,9 +31,7 @@ export default function QrScanner({ onScanSuccess }) {
         }
       )
       .then(() => setScanning(true))
-      .catch((err) => {
-        alert("Kamera neprieinama: " + err.message);
-      });
+      .catch((err) => alert("Kamera neprieinama: " + err.message));
   };
 
   const stopScanner = async () => {

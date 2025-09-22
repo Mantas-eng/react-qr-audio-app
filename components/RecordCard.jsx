@@ -1,3 +1,5 @@
+import QRCode from "react-qr-code";
+
 export default function RecordCard({ rec, onScanClick }) {
   return (
     <div
@@ -11,6 +13,11 @@ export default function RecordCard({ rec, onScanClick }) {
       <p className="text-sm text-gray-600 text-center">
         Tap to open modal and scan QR code
       </p>
+
+      {/* QR vizualizacija */}
+      <div className="mt-4 bg-gray-100 p-2 rounded">
+        <QRCode value={rec.file} size={120} />
+      </div>
     </div>
   );
 }
