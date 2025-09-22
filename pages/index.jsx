@@ -1,4 +1,3 @@
-"use client";
 import { useState } from "react";
 import RecordCard from "../components/RecordCard";
 import QrScanner from "../components/QrScanner";
@@ -18,12 +17,14 @@ export default function HomePage() {
       <h1 className="text-3xl font-bold mb-6 text-center">
         Mokomosios knygos įrašai
       </h1>
+
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {records.map((rec) => (
           <RecordCard key={rec.id} rec={rec} onScanClick={handleCardClick} />
         ))}
       </div>
 
+      {/* Modalas */}
       {selectedRec && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-md relative">
@@ -40,21 +41,16 @@ export default function HomePage() {
             {!scanResult ? (
               <QrScanner onScanSuccess={(text) => setScanResult(text)} />
             ) : (
-              <div className="flex flex-col items-center">
-                <p className="mb-4">Nuskenuotas failas:</p>
-                {scanResult.match(/\.(mp4|avi)$/) ? (
-                  <video
-                    src={scanResult}
-                    controls
-                    className="w-full max-w-md rounded-lg"
-                  />
-                ) : (
-                  <audio
-                    src={scanResult}
-                    controls
-                    className="w-full max-w-md"
-                  />
-                )}
+              <div>
+                <p className="mb-4">Nuskenuotas QR kodas:</p>
+                <a
+                  href={scanResult}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  {scanResult}
+                </a>
               </div>
             )}
           </div>
