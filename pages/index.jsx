@@ -8,7 +8,7 @@ export default function HomePage() {
   const [selectedRec, setSelectedRec] = useState(null);
   const [scanResult, setScanResult] = useState("");
 
-  const handleCardClick = (rec) => {
+  const handleScanClick = (rec) => {
     setSelectedRec(rec);
     setScanResult(""); // išvalome ankstesnį rezultatą
   };
@@ -21,9 +21,7 @@ export default function HomePage() {
 
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {records.map((rec) => (
-          <div key={rec.id} onClick={() => handleCardClick(rec)}>
-            <RecordCard rec={rec} />
-          </div>
+          <RecordCard key={rec.id} rec={rec} onScanClick={handleScanClick} />
         ))}
       </div>
 
@@ -34,6 +32,7 @@ export default function HomePage() {
 
             {!scanResult ? (
               <QrScanner
+                qrValue={selectedRec.file} // perduodame failo nuorodą QR kodui
                 onScanSuccess={(text) => setScanResult(text)}
                 onClose={() => setSelectedRec(null)}
               />

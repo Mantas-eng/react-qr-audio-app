@@ -1,16 +1,19 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
+import QRCode from "react-qr-code";
 
-export default function QrScanner({ onScanSuccess, onClose }) {
+export default function QrScanner({ qrValue, onScanSuccess, onClose }) {
   const [scanning, setScanning] = useState(false);
   const html5QrCodeRef = useRef(null);
+  const qrRegionId = "qr-reader"; // pridėtas id
 
-  useEffect(() => {
-    if (!scanning) return;
-
-    const qrRegion = document.getElementById("qr-reader");
-    if (!qrRegion) return; // laukiam, kol elementas atsiranda
+  const startScanner = () => {
+    const qrContainer = document.getElementById(qrRegionId);
+    if (!qrContainer) {
+      alert("QR skaitytuvo elementas nerastas!");
+      return;
+    }
 
     const cameraMode = /Mobi|Android|iPhone|iPad|iPod/i.test(
       navigator.userAgent
@@ -18,7 +21,7 @@ export default function QrScanner({ onScanSuccess, onClose }) {
       ? "environment"
       : "user";
 
-    html5QrCodeRef.current = new Html5Qrcode("qr-reader");
+    html5QrCodeRef.current = new Html5Qrcode(qrRegionId);
 
     html5QrCodeRef.current
       .start(
@@ -28,24 +31,26 @@ export default function QrScanner({ onScanSuccess, onClose }) {
           onScanSuccess(decodedText);
           stopScanner();
         },
-        (err) => console.log("QR scan error:", err)
+        (err) => {
+          console.log("QR scan error:", err);
+        }
       )
-      .catch((err) => alert("Kamera neprieinama: " + err.message));
-
-    return () => {
-      html5QrCodeRef.current?.stop().catch(() => {});
-      html5QrCodeRef.current?.clear();
-      html5QrCodeRef.current = null;
-    };
-  }, [scanning]);
-
-  const startScanner = () => setScanning(true);
+      .then(() => setScanning(true))
+      .catch((err) => {
+        alert(
+          "Kamera nerasta arba neprieinama. Patikrinkite naršyklės leidimus: " +
+            err.message
+        );
+      });
+  };
 
   const stopScanner = async () => {
     if (html5QrCodeRef.current) {
       try {
         await html5QrCodeRef.current.stop();
-      } catch {}
+      } catch (err) {
+        console.warn("Scanner stop error (ignored):", err.message);
+      }
       html5QrCodeRef.current.clear();
       html5QrCodeRef.current = null;
     }
@@ -54,28 +59,31 @@ export default function QrScanner({ onScanSuccess, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md flex flex-col items-center">
-        <h2 className="text-xl font-bold mb-4">Scan QR Code</h2>
-
-        {!scanning ? (
-          <button
-            onClick={startScanner}
-            className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
-          >
-            Tap to Scan
-          </button>
-        ) : (
-          <div
-            id="qr-reader"
-            className="w-full h-64 mb-4 bg-gray-200 rounded-md flex items-center justify-center"
-          />
-        )}
-
-        <button onClick={stopScanner} className="text-gray-700 underline mt-2">
-          Cancel
-        </button>
+    <div className="flex flex-col items-center">
+      <div className="mb-4">
+        <p className="mb-2">Scan this QR code with your camera:</p>
+        <QRCode value={qrValue} size={150} />
       </div>
+
+      {!scanning ? (
+        <button
+          onClick={startScanner}
+          className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
+        >
+          Tap to Scan
+        </button>
+      ) : (
+        <div
+          id={qrRegionId} // pridėtas id
+          className="w-full h-64 mb-4 bg-gray-200 rounded-md flex items-center justify-center"
+        >
+          {/* Scanner canvas will appear here */}
+        </div>
+      )}
+
+      <button onClick={stopScanner} className="text-gray-700 underline mt-2">
+        Cancel
+      </button>
     </div>
   );
 }
