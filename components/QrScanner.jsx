@@ -1,15 +1,12 @@
 "use client";
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
-export default function QrScanner({ onScanSuccess, onClose }) {
-  const qrContainerRef = useRef(null);
-  const html5QrCodeRef = useRef(null);
+export default function QrScanner({ onScanSuccess }) {
   const [scanning, setScanning] = useState(false);
 
-  // paleidimas tik kai div jau renderintas
-  useEffect(() => {
-    if (!scanning || !qrContainerRef.current) return;
+  const startScanner = () => {
+    const elementId = "qr-reader";
 
     const cameraMode = /Mobi|Android|iPhone|iPad|iPod/i.test(
       navigator.userAgent
@@ -17,53 +14,51 @@ export default function QrScanner({ onScanSuccess, onClose }) {
       ? "environment"
       : "user";
 
-    html5QrCodeRef.current = new Html5Qrcode(qrContainerRef.current.id);
+    const html5QrCode = new Html5Qrcode(elementId);
 
-    html5QrCodeRef.current
+    html5QrCode
       .start(
         { facingMode: cameraMode },
         { fps: 10, qrbox: 250 },
         (decodedText) => {
           onScanSuccess(decodedText);
-          stopScanner();
+          html5QrCode.stop().then(() => html5QrCode.clear());
+          setScanning(false);
         },
-        (err) => {
-          console.log("QR scan error:", err);
-        }
+        (err) => console.log("QR scan error:", err)
       )
+      .then(() => setScanning(true))
       .catch((err) => alert("Kamera neprieinama: " + err.message));
+  };
 
+  useEffect(() => {
     return () => {
-      stopScanner();
+      // cleanup: stop scanner on unmount
+      if (scanning) {
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        html5QrCode
+          .stop()
+          .then(() => html5QrCode.clear())
+          .catch(() => {});
+      }
     };
   }, [scanning]);
 
-  const startScanner = () => setScanning(true);
-
-  const stopScanner = async () => {
-    if (html5QrCodeRef.current) {
-      try {
-        await html5QrCodeRef.current.stop();
-      } catch (err) {}
-      html5QrCodeRef.current.clear();
-      html5QrCodeRef.current = null;
-    }
-    setScanning(false);
-    onClose && onClose();
-  };
-
   return (
-    <div className="w-full flex flex-col items-center">
+    <div className="flex flex-col items-center w-full">
       {!scanning && (
         <button
           onClick={startScanner}
-          className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
+          className="bg-yellow-400 text-white px-4 py-2 rounded-lg mb-4 hover:bg-yellow-500"
         >
-          Tap to Scan
+          Bakstelėkite, kad nuskanuotumėte
         </button>
       )}
-      <div id="qr-reader" ref={qrContainerRef}>
-        {scanning && <p className="text-gray-600">Scanning...</p>}
+      <div
+        id="qr-reader"
+        className="w-full h-64 bg-gray-200 rounded-md flex items-center justify-center"
+      >
+        {scanning && <p className="text-gray-600">Skenuojama...</p>}
       </div>
     </div>
   );
