@@ -52,11 +52,15 @@ export default function QrScanner({ onScanSuccess }) {
           onClick={startScanner}
           className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
         >
-          Tap to Scan
+          Bakstelėkite, kad nuskenuotumėte
         </button>
       )}
-      <div id="qr-reader" ref={qrContainerRef}>
-        {scanning && <p className="text-gray-600">Scanning...</p>}
+      <div
+        id="qr-reader"
+        ref={qrContainerRef}
+        className="w-full h-64 bg-gray-200 rounded-md flex items-center justify-center"
+      >
+        {scanning && <p className="text-gray-600">Skenuojama...</p>}
       </div>
     </div>
   );
