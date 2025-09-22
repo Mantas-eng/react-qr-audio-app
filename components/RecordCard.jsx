@@ -1,5 +1,6 @@
+"use client";
 import Link from "next/link";
-import QRCode from "qrcode.react";
+import QRCode from "react-qr-code";
 
 export default function RecordCard({ rec, showButton = true }) {
   const link = `/record/${rec.id}`;
@@ -11,9 +12,11 @@ export default function RecordCard({ rec, showButton = true }) {
         {rec.file.match(/\.(mp4|avi)$/) ? "🎬" : "🎵"}
       </div>
       <h2 className="text-lg font-semibold mb-4 text-center">{rec.title}</h2>
+
       <div className="mb-4">
         <QRCode value={origin + link} size={96} />
       </div>
+
       {showButton && (
         <Link
           href={link}

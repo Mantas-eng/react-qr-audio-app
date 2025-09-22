@@ -3,51 +3,59 @@ import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
 export default function QrScanner({ onScanSuccess, onClose }) {
-  const [scanning, setScanning] = useState(false);
-  const qrContainerRef = useRef(null);
+  const qrRef = useRef(null);
   const html5QrCodeRef = useRef(null);
+  const [scanning, setScanning] = useState(false);
 
-  const startScanner = () => {
-    if (!qrContainerRef.current) return;
+  useEffect(() => {
+    if (!scanning) return;
+    if (!qrRef.current) return;
 
-    const cameraMode = /Mobi|Android|iPhone|iPad|iPod/i.test(
-      navigator.userAgent
-    )
-      ? "environment"
-      : "user";
+    html5QrCodeRef.current = new Html5Qrcode(qrRef.current.id);
 
-    html5QrCodeRef.current = new Html5Qrcode(qrContainerRef.current);
+    // Pabandome gauti desktop kamerą, jei yra
+    const config = {
+      fps: 10,
+      qrbox: 250,
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+    };
 
     html5QrCodeRef.current
       .start(
-        { facingMode: cameraMode },
-        { fps: 10, qrbox: 250 },
+        { facingMode: "environment" }, // mobilui
+        config,
         (decodedText) => {
           onScanSuccess(decodedText);
-          stopScanner();
+          html5QrCodeRef.current.stop();
+          setScanning(false);
         },
-        (errorMessage) => {}
+        (err) => {
+          // console.log(err);
+        }
       )
-      .then(() => setScanning(true))
-      .catch((err) => {
-        alert(
-          "Kamera nerasta arba neprieinama. Patikrinkite naršyklės leidimus: " +
-            err.message
-        );
+      .catch(async (err) => {
+        // Jei nepavyksta su 'environment', bandome default kamerą (desktop)
+        await html5QrCodeRef.current
+          .start(
+            { facingMode: "user" },
+            config,
+            (decodedText) => {
+              onScanSuccess(decodedText);
+              html5QrCodeRef.current.stop();
+              setScanning(false);
+            },
+            (err) => {}
+          )
+          .catch((e) => {
+            alert("Kamera nepasiekiama. Patikrinkite prieigą prie kameros.");
+            setScanning(false);
+          });
       });
-  };
 
-  const stopScanner = async () => {
-    if (html5QrCodeRef.current) {
-      try {
-        await html5QrCodeRef.current.stop();
-      } catch (err) {}
-      html5QrCodeRef.current.clear();
-      html5QrCodeRef.current = null;
-    }
-    setScanning(false);
-    onClose();
-  };
+    return () => {
+      html5QrCodeRef.current?.stop().catch(() => {});
+    };
+  }, [scanning]);
 
   return (
     <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
@@ -55,18 +63,22 @@ export default function QrScanner({ onScanSuccess, onClose }) {
         <h2 className="text-xl font-bold mb-4">Scan QR Code</h2>
         {!scanning ? (
           <button
-            onClick={startScanner}
+            onClick={() => setScanning(true)}
             className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
           >
             Tap to Scan
           </button>
         ) : (
-          <div
-            ref={qrContainerRef}
-            className="w-full h-64 mb-4 bg-gray-200 rounded-md flex items-center justify-center"
-          />
+          <div id="qr-reader" className="w-full h-64 mb-4" ref={qrRef}></div>
         )}
-        <button onClick={stopScanner} className="text-gray-700 underline mt-2">
+        <button
+          onClick={() => {
+            html5QrCodeRef.current?.stop().catch(() => {});
+            setScanning(false);
+            onClose();
+          }}
+          className="text-gray-700 underline"
+        >
           Cancel
         </button>
       </div>

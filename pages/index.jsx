@@ -18,16 +18,19 @@ export default function HomePage() {
 
   const handleCardClick = (rec) => {
     if (isMobile) {
-      setSelectedRec(rec);
+      setSelectedRec(rec); // mobilui parodys QR “Tap to Scan”
     }
   };
 
-  const closeQR = () => setSelectedRec(null);
+  const openScanner = () => setScannerOpen(true);
+  const closeScanner = () => setScannerOpen(false);
 
   const handleScanSuccess = (decodedText) => {
-    alert("QR kodas nuskaitytas: " + decodedText);
-    setScannerOpen(false);
+    alert(`QR nuskaitytas: ${decodedText}`);
+    closeScanner();
   };
+
+  const closeQRModal = () => setSelectedRec(null);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -41,6 +44,7 @@ export default function HomePage() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* QR modal mobiliesiems */}
         {selectedRec && (
           <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-2xl shadow-xl text-center">
@@ -50,13 +54,7 @@ export default function HomePage() {
               <p className="mb-4 text-gray-600">Tap to Scan QR code 👇</p>
               <RecordCard rec={selectedRec} showButton={false} />
               <button
-                onClick={() => setScannerOpen(true)}
-                className="mt-4 px-4 py-2 bg-yellow-400 text-black rounded-xl hover:bg-yellow-500"
-              >
-                Tap to Scan
-              </button>
-              <button
-                onClick={closeQR}
+                onClick={closeQRModal}
                 className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
               >
                 Uždaryti
@@ -65,12 +63,19 @@ export default function HomePage() {
           </div>
         )}
 
+        {/* QR Scanner modal */}
         {scannerOpen && (
-          <QrScanner
-            onScanSuccess={handleScanSuccess}
-            onClose={() => setScannerOpen(false)}
-          />
+          <QrScanner onScanSuccess={handleScanSuccess} onClose={closeScanner} />
         )}
+
+        <div className="flex justify-center mb-6">
+          <button
+            onClick={openScanner}
+            className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 transition"
+          >
+            Tap to Scan (Mobile/Desktop)
+          </button>
+        </div>
 
         <div
           className={`grid gap-6 ${
