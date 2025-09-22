@@ -1,99 +1,63 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import RecordCard from "../components/RecordCard";
 import QrScanner from "../components/QrScanner";
 import records from "../data/records";
 
 export default function HomePage() {
-  const [isMobile, setIsMobile] = useState(false);
   const [selectedRec, setSelectedRec] = useState(null);
-  const [scannerVisible, setScannerVisible] = useState(false);
   const [scanResult, setScanResult] = useState("");
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
   const handleCardClick = (rec) => {
-    if (isMobile) {
-      setSelectedRec(rec);
-    }
+    setSelectedRec(rec);
+    setScanResult(""); // išvalome ankstesnį rezultatą
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-gradient-to-r from-blue-700 to-blue-900 text-white py-6 shadow">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-2xl font-bold">Mokomosios knygos įrašai</h1>
-          <p className="text-sm mt-1">
-            Pasirinkite įrašą arba nuskenuokite QR kodą
-          </p>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Mokomosios knygos įrašai
+      </h1>
 
-      <main className="container mx-auto px-4 py-8">
-        {selectedRec && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-2xl shadow-xl text-center">
-              <h2 className="text-xl font-semibold mb-4">
-                {selectedRec.title}
-              </h2>
-              <p className="mb-4 text-gray-600">Tap to Scan QR code 👇</p>
-              <RecordCard rec={selectedRec} showButton={false} />
-              <button
-                onClick={() => setSelectedRec(null)}
-                className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
-              >
-                Uždaryti
-              </button>
-            </div>
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {records.map((rec) => (
+          <RecordCard key={rec.id} rec={rec} onScanClick={handleCardClick} />
+        ))}
+      </div>
+
+      {/* Modalas su QR skaitytuvu */}
+      {selectedRec && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">{selectedRec.title}</h2>
+
+            {!scanResult ? (
+              <QrScanner
+                onScanSuccess={(text) => setScanResult(text)}
+                onClose={() => setSelectedRec(null)}
+              />
+            ) : (
+              <div>
+                <p className="mb-4">Nuskenuotas QR kodas:</p>
+                <a
+                  href={scanResult}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  {scanResult}
+                </a>
+                <button
+                  onClick={() => setSelectedRec(null)}
+                  className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
+                >
+                  Uždaryti
+                </button>
+              </div>
+            )}
           </div>
-        )}
-
-        <div
-          className={`grid gap-6 ${
-            isMobile
-              ? "grid-cols-1"
-              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-          }`}
-        >
-          {records.map((rec) => (
-            <div key={rec.id} onClick={() => handleCardClick(rec)}>
-              <RecordCard rec={rec} showButton={!isMobile} />
-            </div>
-          ))}
         </div>
-
-        <div className="mt-8 text-center">
-          <button
-            onClick={() => setScannerVisible(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700"
-          >
-            Open QR Scanner
-          </button>
-        </div>
-
-        {scannerVisible && (
-          <QrScanner
-            onScanSuccess={(text) => {
-              setScanResult(text);
-              setScannerVisible(false);
-            }}
-            onClose={() => setScannerVisible(false)}
-          />
-        )}
-
-        {scanResult && (
-          <div className="mt-4 text-center">
-            <p className="font-semibold">Scanned QR code:</p>
-            <code className="bg-gray-200 p-2 rounded">{scanResult}</code>
-          </div>
-        )}
-      </main>
+      )}
     </div>
   );
 }

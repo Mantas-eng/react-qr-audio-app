@@ -1,65 +1,78 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
-export default function QrScanner({ onScanSuccess, onClose, recTitle }) {
-  const qrRef = useRef(null);
-  const html5QrCodeRef = useRef(null);
+export default function QrScanner({ onScanSuccess, onClose }) {
   const [scanning, setScanning] = useState(false);
+  const html5QrCodeRef = useRef(null);
 
   useEffect(() => {
     if (!scanning) return;
-    if (!qrRef.current) return;
 
-    html5QrCodeRef.current = new Html5Qrcode(qrRef.current.id);
+    const qrRegion = document.getElementById("qr-reader");
+    if (!qrRegion) return; // laukiam, kol elementas atsiranda
 
-    const config = { fps: 10, qrbox: 250 };
+    const cameraMode = /Mobi|Android|iPhone|iPad|iPod/i.test(
+      navigator.userAgent
+    )
+      ? "environment"
+      : "user";
+
+    html5QrCodeRef.current = new Html5Qrcode("qr-reader");
 
     html5QrCodeRef.current
       .start(
-        { facingMode: "environment" },
-        config,
+        { facingMode: cameraMode },
+        { fps: 10, qrbox: 250 },
         (decodedText) => {
           onScanSuccess(decodedText);
-          html5QrCodeRef.current.stop().catch(() => {});
-          setScanning(false);
+          stopScanner();
         },
-        (err) => {}
+        (err) => console.log("QR scan error:", err)
       )
-      .catch(async () => {
-        alert("Kamera nepasiekiama. Patikrinkite prieigą prie kameros.");
-        setScanning(false);
-      });
+      .catch((err) => alert("Kamera neprieinama: " + err.message));
 
     return () => {
       html5QrCodeRef.current?.stop().catch(() => {});
+      html5QrCodeRef.current?.clear();
+      html5QrCodeRef.current = null;
     };
-  }, [scanning, onScanSuccess]);
+  }, [scanning]);
+
+  const startScanner = () => setScanning(true);
+
+  const stopScanner = async () => {
+    if (html5QrCodeRef.current) {
+      try {
+        await html5QrCodeRef.current.stop();
+      } catch {}
+      html5QrCodeRef.current.clear();
+      html5QrCodeRef.current = null;
+    }
+    setScanning(false);
+    onClose();
+  };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center">
       <div className="bg-white rounded-xl p-6 w-full max-w-md flex flex-col items-center">
-        <h2 className="text-xl font-bold mb-4">{recTitle}</h2>
+        <h2 className="text-xl font-bold mb-4">Scan QR Code</h2>
+
         {!scanning ? (
           <button
-            onClick={() => setScanning(true)}
+            onClick={startScanner}
             className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
           >
-            Scan QR Code with Camera
+            Tap to Scan
           </button>
         ) : (
-          <div id="qr-reader" className="w-full h-64 mb-4" ref={qrRef}></div>
+          <div
+            id="qr-reader"
+            className="w-full h-64 mb-4 bg-gray-200 rounded-md flex items-center justify-center"
+          />
         )}
 
-        <button
-          onClick={() => {
-            html5QrCodeRef.current?.stop().catch(() => {});
-            setScanning(false);
-            onClose();
-          }}
-          className="text-gray-700 underline"
-        >
+        <button onClick={stopScanner} className="text-gray-700 underline mt-2">
           Cancel
         </button>
       </div>
