@@ -55,11 +55,7 @@ export default function QrScanner({ onScanSuccess }) {
           Tap to Scan
         </button>
       )}
-      <div
-        id="qr-reader"
-        ref={qrContainerRef}
-        className="w-full h-64 bg-gray-200 rounded-md flex items-center justify-center"
-      >
+      <div id="qr-reader" ref={qrContainerRef}>
         {scanning && <p className="text-gray-600">Scanning...</p>}
       </div>
     </div>
