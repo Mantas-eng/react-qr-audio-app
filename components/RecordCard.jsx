@@ -1,7 +1,7 @@
 import Link from "next/link";
-import QRCode from "react-qr-code";
+import QRCode from "qrcode.react";
 
-export default function RecordCard({ rec, showButton = true }) {
+export default function RecordCard({ rec, isMobile, onScanClick }) {
   const link = `/record/${rec.id}`;
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
@@ -11,17 +11,28 @@ export default function RecordCard({ rec, showButton = true }) {
         {rec.file.match(/\.(mp4|avi)$/) ? "🎬" : "🎵"}
       </div>
       <h2 className="text-lg font-semibold mb-4 text-center">{rec.title}</h2>
-      <div className="mb-4">
-        <QRCode value={origin + link} size={96} />{" "}
-        {/* veiks su react-qr-code */}
-      </div>
-      {showButton && (
-        <Link
-          href={link}
-          className="mt-2 inline-block bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 text-center"
+
+      {!isMobile && (
+        <>
+          <div className="mb-4">
+            <QRCode value={origin + link} size={96} />
+          </div>
+          <Link
+            href={link}
+            className="mt-2 inline-block bg-indigo-600 text-white px-4 py-2 rounded-xl hover:bg-indigo-700 text-center"
+          >
+            Atidaryti
+          </Link>
+        </>
+      )}
+
+      {isMobile && (
+        <button
+          onClick={() => onScanClick(rec)}
+          className="mt-2 inline-block bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700 text-center"
         >
-          Atidaryti
-        </Link>
+          Scan QR Code with Camera
+        </button>
       )}
     </div>
   );
