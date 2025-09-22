@@ -1,5 +1,5 @@
 import Link from "next/link";
-import QRCode from "qrcode.react";
+import QRCode from "react-qr-code";
 
 export default function RecordCard({ rec, showButton = true }) {
   const link = `/record/${rec.id}`;
@@ -12,7 +12,8 @@ export default function RecordCard({ rec, showButton = true }) {
       </div>
       <h2 className="text-lg font-semibold mb-4 text-center">{rec.title}</h2>
       <div className="mb-4">
-        <QRCode value={origin + link} size={96} />
+        <QRCode value={origin + link} size={96} />{" "}
+        {/* veiks su react-qr-code */}
       </div>
       {showButton && (
         <Link
