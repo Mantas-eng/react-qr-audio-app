@@ -21,11 +21,12 @@ export default function HomePage() {
 
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {records.map((rec) => (
-          <RecordCard key={rec.id} rec={rec} onScanClick={handleCardClick} />
+          <div key={rec.id} onClick={() => handleCardClick(rec)}>
+            <RecordCard rec={rec} />
+          </div>
         ))}
       </div>
 
-      {/* Modalas su QR skaitytuvu */}
       {selectedRec && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-md">
@@ -38,7 +39,7 @@ export default function HomePage() {
               />
             ) : (
               <div>
-                <p className="mb-4">Nuskenuotas QR kodas:</p>
+                <p className="mb-4">Scanned QR code:</p>
                 <a
                   href={scanResult}
                   target="_blank"
@@ -51,7 +52,7 @@ export default function HomePage() {
                   onClick={() => setSelectedRec(null)}
                   className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
                 >
-                  Uždaryti
+                  Close
                 </button>
               </div>
             )}
