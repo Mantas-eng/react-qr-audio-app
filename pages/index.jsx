@@ -8,9 +8,18 @@ export default function HomePage() {
   const [selectedRec, setSelectedRec] = useState(null);
   const [scanResult, setScanResult] = useState("");
 
-  const handleScanClick = (rec) => {
+  const handleCardClick = (rec) => {
     setSelectedRec(rec);
     setScanResult(""); // išvalome ankstesnį rezultatą
+  };
+
+  const handleScanSuccess = (text) => {
+    setScanResult(text);
+  };
+
+  const closeModal = () => {
+    setSelectedRec(null);
+    setScanResult("");
   };
 
   return (
@@ -21,21 +30,18 @@ export default function HomePage() {
 
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
         {records.map((rec) => (
-          <RecordCard key={rec.id} rec={rec} onScanClick={handleScanClick} />
+          <RecordCard key={rec.id} rec={rec} onScanClick={handleCardClick} />
         ))}
       </div>
 
+      {/* Modalas */}
       {selectedRec && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">{selectedRec.title}</h2>
 
             {!scanResult ? (
-              <QrScanner
-                qrValue={selectedRec.file} // perduodame failo nuorodą QR kodui
-                onScanSuccess={(text) => setScanResult(text)}
-                onClose={() => setSelectedRec(null)}
-              />
+              <QrScanner onScanSuccess={handleScanSuccess} />
             ) : (
               <div>
                 <p className="mb-4">Scanned QR code:</p>
@@ -48,12 +54,21 @@ export default function HomePage() {
                   {scanResult}
                 </a>
                 <button
-                  onClick={() => setSelectedRec(null)}
+                  onClick={closeModal}
                   className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
                 >
                   Close
                 </button>
               </div>
+            )}
+
+            {!scanResult && (
+              <button
+                onClick={closeModal}
+                className="mt-4 px-4 py-2 bg-gray-400 text-white rounded-xl hover:bg-gray-500"
+              >
+                Cancel
+              </button>
             )}
           </div>
         </div>
