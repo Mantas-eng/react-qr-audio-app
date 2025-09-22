@@ -1,76 +1,99 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import { useEffect, useState } from "react";
+import RecordCard from "../components/RecordCard";
+import QrScanner from "../components/QrScanner";
+import records from "../data/records";
 
-export default function QrScanner({ onScanSuccess, onClose }) {
-  const [scanning, setScanning] = useState(false);
-  const html5QrCodeRef = useRef(null);
+export default function HomePage() {
+  const [isMobile, setIsMobile] = useState(false);
+  const [selectedRec, setSelectedRec] = useState(null);
+  const [scannerVisible, setScannerVisible] = useState(false);
+  const [scanResult, setScanResult] = useState("");
 
   useEffect(() => {
-    if (!scanning) return;
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
-    // patikrinam, ar elementas yra DOM
-    const qrRegionId = "qr-reader";
-    if (!document.getElementById(qrRegionId)) return;
-
-    html5QrCodeRef.current = new Html5Qrcode(qrRegionId);
-
-    html5QrCodeRef.current
-      .start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-          onScanSuccess(decodedText);
-          html5QrCodeRef.current.stop();
-          setScanning(false);
-        },
-        (errorMessage) => {
-          // console.log("QR error:", errorMessage);
-        }
-      )
-      .catch((err) => console.error("QR start failed:", err));
-
-    return () => {
-      if (html5QrCodeRef.current) {
-        html5QrCodeRef.current.stop().catch(() => {});
-      }
-    };
-  }, [scanning]);
+  const handleCardClick = (rec) => {
+    if (isMobile) {
+      setSelectedRec(rec);
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl p-6 w-full max-w-md flex flex-col items-center">
-        <h2 className="text-xl font-bold mb-4">Scan QR Code</h2>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-gradient-to-r from-blue-700 to-blue-900 text-white py-6 shadow">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-2xl font-bold">Mokomosios knygos įrašai</h1>
+          <p className="text-sm mt-1">
+            Pasirinkite įrašą arba nuskenuokite QR kodą
+          </p>
+        </div>
+      </header>
 
-        {!scanning ? (
+      <main className="container mx-auto px-4 py-8">
+        {selectedRec && (
+          <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-2xl shadow-xl text-center">
+              <h2 className="text-xl font-semibold mb-4">
+                {selectedRec.title}
+              </h2>
+              <p className="mb-4 text-gray-600">Tap to Scan QR code 👇</p>
+              <RecordCard rec={selectedRec} showButton={false} />
+              <button
+                onClick={() => setSelectedRec(null)}
+                className="mt-4 px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600"
+              >
+                Uždaryti
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={`grid gap-6 ${
+            isMobile
+              ? "grid-cols-1"
+              : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          }`}
+        >
+          {records.map((rec) => (
+            <div key={rec.id} onClick={() => handleCardClick(rec)}>
+              <RecordCard rec={rec} showButton={!isMobile} />
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 text-center">
           <button
-            onClick={() => setScanning(true)}
-            className="bg-yellow-400 text-black px-4 py-2 rounded-lg font-semibold mb-4 hover:bg-yellow-500 transition"
+            onClick={() => setScannerVisible(true)}
+            className="bg-green-600 text-white px-4 py-2 rounded-xl hover:bg-green-700"
           >
-            Tap to Scan
+            Open QR Scanner
           </button>
-        ) : (
-          <div
-            id="qr-reader"
-            className="w-full h-64 mb-4"
-            style={{ width: "100%" }}
+        </div>
+
+        {scannerVisible && (
+          <QrScanner
+            onScanSuccess={(text) => {
+              setScanResult(text);
+              setScannerVisible(false);
+            }}
+            onClose={() => setScannerVisible(false)}
           />
         )}
 
-        <button
-          onClick={() => {
-            if (html5QrCodeRef.current) {
-              html5QrCodeRef.current.stop().catch(() => {});
-            }
-            setScanning(false);
-            onClose();
-          }}
-          className="text-gray-700 underline"
-        >
-          Cancel
-        </button>
-      </div>
+        {scanResult && (
+          <div className="mt-4 text-center">
+            <p className="font-semibold">Scanned QR code:</p>
+            <code className="bg-gray-200 p-2 rounded">{scanResult}</code>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
