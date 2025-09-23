@@ -21,7 +21,19 @@ export default function QrScanner({ onScanSuccess }) {
     html5QrCodeRef.current
       .start(
         { facingMode: cameraMode },
-        { fps: 20, qrbox: 250 },
+        {
+          fps: 15,
+          qrbox: (vw, vh) => {
+            const minEdge = Math.min(vw, vh);
+            if (vw < 600) {
+              // 📱 Mobile → 70% ekrano
+              return { width: minEdge * 0.7, height: minEdge * 0.7 };
+            } else {
+              // 💻 Desktop → fiksuotas ~300px
+              return { width: 200, height: 200 };
+            }
+          },
+        },
         (decodedText) => {
           onScanSuccess(decodedText);
           stopScanner();
@@ -58,9 +70,16 @@ export default function QrScanner({ onScanSuccess }) {
       <div
         id="qr-reader"
         ref={qrContainerRef}
-        className="w-full h-64 bg-gray-200 rounded-md flex items-center justify-center"
+        className="relative w-full max-w-lg aspect-square bg-gray-200 rounded-md flex items-center justify-center"
       >
-        {scanning && <p className="text-gray-600">Skenuojama...</p>}
+        {scanning && (
+          <>
+            <p className="absolute bottom-2 text-gray-600 bg-white px-2 py-1 rounded">
+              Skenuojama...
+            </p>
+            <div className="absolute border-4 border-white rounded-md w-2/3 h-2/3" />
+          </>
+        )}
       </div>
     </div>
   );
