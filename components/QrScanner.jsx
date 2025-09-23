@@ -1,11 +1,14 @@
 "use client";
 import { useRef, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
+import { Rnd } from "react-rnd";
 
 export default function QrScanner({ onScanSuccess }) {
   const qrContainerRef = useRef(null);
   const html5QrCodeRef = useRef(null);
   const [scanning, setScanning] = useState(false);
+  const [boxSize, setBoxSize] = useState({ width: 250, height: 250 });
+  const [boxPos, setBoxPos] = useState({ x: 50, y: 50 });
 
   const startScanner = () => {
     if (!qrContainerRef.current) return;
@@ -23,15 +26,11 @@ export default function QrScanner({ onScanSuccess }) {
         { facingMode: cameraMode },
         {
           fps: 15,
-          qrbox: (vw, vh) => {
-            const minEdge = Math.min(vw, vh);
-            if (vw < 600) {
-              // 📱 Mobile → 70% ekrano
-              return { width: minEdge * 0.7, height: minEdge * 0.7 };
-            } else {
-              // 💻 Desktop → fiksuotas ~300px
-              return { width: 200, height: 200 };
-            }
+          qrbox: () => {
+            return {
+              width: boxSize.width,
+              height: boxSize.height,
+            };
           },
         },
         (decodedText) => {
@@ -70,14 +69,32 @@ export default function QrScanner({ onScanSuccess }) {
       <div
         id="qr-reader"
         ref={qrContainerRef}
-        className="relative w-full max-w-lg aspect-square bg-gray-200 rounded-md flex items-center justify-center"
+        className="relative w-full max-w-lg aspect-square bg-gray-200 rounded-md overflow-hidden"
       >
         {scanning && (
           <>
             <p className="absolute bottom-2 text-gray-600 bg-white px-2 py-1 rounded">
               Skenuojama...
             </p>
-            <div className="absolute border-4 border-white rounded-md w-2/3 h-2/3" />
+
+            {/* 🔲 Draggable + Resizable overlay */}
+            <Rnd
+              size={{ width: boxSize.width, height: boxSize.height }}
+              position={{ x: boxPos.x, y: boxPos.y }}
+              onDragStop={(e, d) => {
+                setBoxPos({ x: d.x, y: d.y });
+              }}
+              onResizeStop={(e, dir, ref, delta, pos) => {
+                setBoxSize({
+                  width: parseInt(ref.style.width),
+                  height: parseInt(ref.style.height),
+                });
+                setBoxPos(pos);
+              }}
+              bounds="parent"
+              lockAspectRatio
+              className="border-4 border-white rounded-md"
+            />
           </>
         )}
       </div>
