@@ -108,14 +108,8 @@ export default function QrScanner({ onScanSuccess }) {
       <div
         id="qr-reader"
         ref={qrContainerRef}
-        className="relative w-full max-w-lg aspect-square bg-gray-200 rounded-md overflow-hidden"
-      >
-        {scanning && (
-          <p className="absolute bottom-2 text-gray-600 bg-white px-2 py-1 rounded">
-            Skenuojama...
-          </p>
-        )}
-      </div>
+        className="relative w-full max-w-lg aspect-square   rounded-md overflow-hidden"
+      ></div>
     </div>
   );
 }
