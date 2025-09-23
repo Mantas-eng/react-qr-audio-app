@@ -30,7 +30,7 @@ export default function HomePage() {
           <div className="bg-white p-6 rounded-2xl shadow-xl text-center w-full max-w-md relative">
             <button
               onClick={() => setSelectedRec(null)}
-              className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-yellow-400 text-white font-semibold px-5 py-1 rounded-lg hover:bg-yellow-500 transition"
+              className="absolute bottom-0 left-1/2 -translate-x-1/2 bg-yellow-400 text-white font-semibold px-5 py-1 rounded-lg hover:bg-yellow-500 transition"
             >
               Uždaryti
             </button>
